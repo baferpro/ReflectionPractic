@@ -40,12 +40,21 @@ namespace ReflectionPractic
                 }
             }
             Console.ReadLine();
+
+
+            Office<int> office1 = new Office<int>(123);
+            Office<string> office2 = new Office<string>("124");
+
+            Console.WriteLine("oficce 1 number = " + office1.Number);
+            Console.WriteLine("oficce 2 number = " + office2.Number);
+            Console.ReadLine();
         }
     }
 
     [Test]
     class Shopping
     {
+        public T Id { get; set; }
         [Buyer] public int Summa { get; set; }
 
         public Shopping(int summa)
@@ -77,5 +86,14 @@ namespace ReflectionPractic
             this.TestName = "Test";
         }
 
+    }
+    class Office<T>
+    {
+        public T Number { get; set; }
+
+        public Office(T number)
+        {
+            Number = number;
+        }
     }
 }
