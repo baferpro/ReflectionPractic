@@ -54,7 +54,6 @@ namespace ReflectionPractic
     [Test]
     class Shopping
     {
-        public T Id { get; set; }
         [Buyer] public int Summa { get; set; }
 
         public Shopping(int summa)
