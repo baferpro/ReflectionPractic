@@ -10,38 +10,38 @@ namespace ReflectionPractic
 {
     class Program
     {
+        public static ShopBuyTestEntities db = new ShopBuyTestEntities();
 
         public delegate int[] MyDelegate();
         public static int[] number = new int[] { 2, 4, 6, 4, 7, 3, 8, 3, 1, 9 };
-
         static void Main(string[] args)
         {
             //Reflection / attributes
             Console.WriteLine("----------------------------\nReflection / attributes\n----------------------------");
-            var shopping = new Shopping(500);
-            var buyer = new Buyer("User1");
+            var shopping = new Shoppings(500);
+            var buyer = new Buyers("User1");
 
-            PropertyInfo shopInfo = typeof(Shopping).GetProperties().Where(i => i.Name.Equals("Summa")).FirstOrDefault();
+            PropertyInfo shopInfo = typeof(Shoppings).GetProperties().Where(i => i.Name.Equals("Summa")).FirstOrDefault();
             Console.WriteLine(shopInfo.Name + " = " + shopInfo.GetValue(shopping));
             Type type = shopInfo.CustomAttributes.FirstOrDefault().AttributeType;
             PropertyInfo userName = type.GetProperties().Where(i => i.Name.Equals("Name")).FirstOrDefault();
             var test = userName.GetValue(buyer).ToString();
             Console.WriteLine(userName.Name + " = " + test);
 
-            var type1 = typeof(Shopping);
+            var type1 = typeof(Shoppings);
             var attributes = type1.GetCustomAttributes(false);
-            foreach(var attribute in attributes)
+            foreach (var attribute in attributes)
             {
                 Console.WriteLine(attribute);
             }
 
             var properties = type1.GetProperties();
-            foreach(var prop in properties)
+            foreach (var prop in properties)
             {
                 Console.WriteLine(prop.PropertyType + " " + prop.Name);
 
                 var attrs = prop.GetCustomAttributes(false);
-                foreach(var a in attrs)
+                foreach (var a in attrs)
                 {
                     Console.WriteLine(a);
                 }
@@ -66,7 +66,7 @@ namespace ReflectionPractic
             var b = new CheckOut<BMW>();
             Console.WriteLine(b is iCheckOut<BMW>);
             Console.WriteLine(b is iCheckOut<Car>);
-            Console.WriteLine(b is iCheckOut<Series8>); 
+            Console.WriteLine(b is iCheckOut<Series8>);
             Console.WriteLine("\nin"); //Контрвариантность
             var c = new CheckIn<BMW>();
             Console.WriteLine(c is iCheckIn<BMW>);
@@ -81,7 +81,7 @@ namespace ReflectionPractic
             Console.WriteLine(result);
 
             Console.WriteLine("\nAction");
-            Action<int, int> sum = (num1,num2) => Console.WriteLine(num1 + num2);
+            Action<int, int> sum = (num1, num2) => Console.WriteLine(num1 + num2);
             sum(5, 6);
 
             Console.WriteLine("\nPredicate");
@@ -97,19 +97,71 @@ namespace ReflectionPractic
             var newLambda = (Func<int, int, int>)expressionlambda.Compile();
             Console.WriteLine(newLambda(10, 5));
 
+            //Events
+            Console.WriteLine(" \n----------------------------\nEvents\n----------------------------");
+            Account acc = new Account(100);
+            acc.Notify += DisplayMessage;
+            acc.Put(20);
+            acc.Take(70);
+            acc.Take(150);
+
+            //Linq
+            Console.WriteLine(" \n----------------------------\nLinq\n----------------------------");
+            string bestBuyer = db.Shopping.OrderByDescending(i => i.Summa).Select(i => i.Buyer.Name).FirstOrDefault().ToString();
+            Console.WriteLine(bestBuyer);
+
+            //iEnumerable
+            Console.WriteLine(" \n----------------------------\niEnumerable\n----------------------------");
+            var startTime = System.Diagnostics.Stopwatch.StartNew();
+            IEnumerable<Shopping> shoppings1 = db.Shopping.Where(i => i.Buyer.Name.Contains("й")).ToList();
+            foreach (var j in shoppings1)
+            {
+                Console.WriteLine(j.Buyer.Name);
+            }
+            startTime.Stop();
+            var resultTime = startTime.Elapsed;
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}",
+                resultTime.Hours,
+                resultTime.Minutes,
+                resultTime.Seconds,
+                resultTime.Milliseconds);
+            Console.WriteLine("Время выполнения: " + elapsedTime);
+
+            //iEnumerable
+            Console.WriteLine(" \n----------------------------\nIQueryable\n----------------------------");
+            var startTime1 = System.Diagnostics.Stopwatch.StartNew();
+            IQueryable<Shopping> shoppings2 = db.Shopping.Where(i => i.Buyer.Name.Contains("й"));
+            List<Shopping> list = shoppings2.ToList();
+            foreach (var j in list)
+            {
+                Console.WriteLine(j.Buyer.Name);
+            }
+
+            startTime1.Stop();
+            var resultTime1 = startTime1.Elapsed;
+            var elapsedTime1 = String.Format("{0:00}:{1:00}:{2:00}.{3:000}",
+                resultTime1.Hours,
+                resultTime1.Minutes,
+                resultTime1.Seconds,
+                resultTime1.Milliseconds);
+            Console.WriteLine("Время выполнения: " + elapsedTime1);
 
             //End
             Console.ReadLine();
         }
 
-        //Delegats
+        //Delegats and events
         public static int[] LeniviyPodstchet()
         {
             return number.Where(i => i % 2 == 0).ToArray();
         }
+
+        public delegate void MessageHandler(string message);
+        public event MessageHandler Notify;
         public static void ChtotoHz(MyDelegate myDelegate)
         {
             myDelegate += myDelegate;
+
             foreach (var a in myDelegate())
             {
                 Console.WriteLine(a);
@@ -120,16 +172,16 @@ namespace ReflectionPractic
         private static int GetInt(int v1, int v2, Func<int, int, int> degr)
         {
             int result = -1;
+
             if (v1 > 0 && v2 > 0)
                 result = degr(v1, v2);
+
             return result;
         }
         static int Degree(int number, int degree)
         {
-            if (degree <= 0)
-                return -1;
-
             int result = number;
+
             do
             {
                 degree--;
@@ -138,28 +190,77 @@ namespace ReflectionPractic
 
             return result;
         }
+
+        //Events
+        private static void DisplayMessage(object sender, AccountEventArgs e)
+        {
+            Console.WriteLine($"Сумма транзакции: {e.Sum}");
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    //Events
+    class Account
+    {
+        public delegate void AccountHandler(object sender, AccountEventArgs e);
+        public event AccountHandler Notify;
+        public Account(int sum)
+        {
+            Sum = sum;
+        }
+        public int Sum { get; private set; }
+        public void Put(int sum)
+        {
+            Sum += sum;
+            Notify?.Invoke(this, new AccountEventArgs($"На счет поступило {sum}", sum));
+        }
+        public void Take(int sum)
+        {
+            if (Sum >= sum)
+            {
+                Sum -= sum;
+                Notify?.Invoke(this, new AccountEventArgs($"Сумма {sum} снята со счета", sum));
+            }
+            else
+            {
+                Notify?.Invoke(this, new AccountEventArgs("Недостаточно денег на счете", sum)); ;
+            }
+        }
+    }
+    class AccountEventArgs
+    {
+        // Сообщение
+        public string Message { get; }
+        // Сумма, на которую изменился счет
+        public int Sum { get; }
+
+        public AccountEventArgs(string mes, int sum)
+        {
+            Message = mes;
+            Sum = sum;
+        }
     }
 
     //Reflection / attributes
     [Test]
-    public class Shopping
+    public class Shoppings
     {
-        [Buyer] public int Summa { get; set; }
+        [Buyers] public int Summa { get; set; }
 
-        public Shopping(int summa)
+        public Shoppings(int summa)
         {
             this.Summa = summa;
         }
     }
 
     [AttributeUsage(AttributeTargets.Property)]
-    public class Buyer : Attribute
+    public class Buyers : Attribute
     {
         public string Name { get; set; }
 
-        public Buyer()
+        public Buyers()
         { }
-        public Buyer(string name)
+        public Buyers(string name)
         {
             this.Name = name;
         }
@@ -174,7 +275,6 @@ namespace ReflectionPractic
         {
             this.TestName = "Test";
         }
-
     }
 
     //Generics
@@ -209,3 +309,4 @@ namespace ReflectionPractic
         public void Save(T ID) { throw new NotImplementedException(); }
     }
 }
+
