@@ -89,6 +89,7 @@
       <DependentUpon>ModelDB.edmx</DependentUpon>
     </None>
     <None Include="packages.config" />
+    <None Include="shoptest.bak" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ModelDB.Context.tt">
