@@ -8,15 +8,15 @@ namespace DelegatsAndEvents
 {
     class Program
     {
-        public delegate int[] MyDelegate();
+        public delegate IEnumerable<int> MyDelegate();
         public static int[] number = new int[] { 2, 4, 6, 4, 7, 3, 8, 3, 1, 9 };
         static void Main(string[] args)
         {
 
             //Delegats
             Console.WriteLine(" \n----------------------------\nDelegats\n----------------------------");
-            MyDelegate myDelegate = new MyDelegate(LeniviyPodstchet);
-            ChtotoHz(myDelegate);
+            MyDelegate myDelegate = new MyDelegate(LazyСounting);
+            MultiCast(myDelegate);
 
             //Events
             Console.WriteLine(" \n----------------------------\nEvents\n----------------------------");
@@ -30,14 +30,12 @@ namespace DelegatsAndEvents
         }
 
 
-        public static int[] LeniviyPodstchet()
+        public static IEnumerable<int> LazyСounting()
         {
-            return number.Where(i => i % 2 == 0).ToArray();
+            return number.Where(i => i % 2 == 0);
         }
 
-        public delegate void MessageHandler(string message);
-        public event MessageHandler Notify;
-        public static void ChtotoHz(MyDelegate myDelegate)
+        public static void MultiCast(MyDelegate myDelegate)
         {
             myDelegate += myDelegate;
 
