@@ -42,8 +42,8 @@ namespace ReflectionPractic
 
                 var attrs = prop.GetCustomAttributes(false);
                 foreach (var a in attrs)
-                    Console.WriteLine(a);
                 {
+                    Console.WriteLine(a);
                 }
             }
 
