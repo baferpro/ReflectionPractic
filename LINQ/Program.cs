@@ -13,8 +13,11 @@ namespace LINQ
         {
             //Linq
             Console.WriteLine(" \n----------------------------\nLinq\n----------------------------");
-            string bestBuyer = db.Shopping.OrderByDescending(i => i.Summa).Select(i => i.Buyer.Name).FirstOrDefault().ToString();
-            Console.WriteLine(bestBuyer);
+            int bestBuyer = db.Shopping.GroupBy(i => i.BuyerId)
+                                        .Select(g => new { Summa = g.Sum( i => i.Summa), BuyerId = g.Key })
+                                        .OrderByDescending(i => i.Summa)
+                                        .Select(i => i.BuyerId).FirstOrDefault();
+            Console.WriteLine(db.Buyer.Where(i => i.Id == bestBuyer).Select(i => i.Name).FirstOrDefault());
 
             //iEnumerable
             Console.WriteLine(" \n----------------------------\niEnumerable\n----------------------------");
