@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ReflectionPractic
+namespace LINQ
 {
     using System;
     using System.Collections.Generic;
