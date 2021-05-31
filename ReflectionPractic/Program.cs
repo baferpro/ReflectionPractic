@@ -42,8 +42,8 @@ namespace ReflectionPractic
 
                 var attrs = prop.GetCustomAttributes(false);
                 foreach (var a in attrs)
-                {
                     Console.WriteLine(a);
+                {
                 }
             }
 
@@ -77,7 +77,7 @@ namespace ReflectionPractic
             Console.WriteLine(" \n----------------------------\nFunc and etc.\n----------------------------");
             Console.WriteLine("Func");
             Func<int, int, int> degr = Degree;
-            int result = GetInt(3, 5, degr);
+            int result = degr(3, 5);
             Console.WriteLine(result);
 
             Console.WriteLine("\nAction");
@@ -169,24 +169,26 @@ namespace ReflectionPractic
         }
 
         //Func and etc.
-        private static int GetInt(int v1, int v2, Func<int, int, int> degr)
-        {
-            int result = -1;
-
-            if (v1 > 0 && v2 > 0)
-                result = degr(v1, v2);
-
-            return result;
-        }
         static int Degree(int number, int degree)
         {
             int result = number;
 
-            do
+            if (degree > 0)
             {
-                degree--;
-                result *= number;
-            } while (degree > 1);
+                do
+                {
+                    degree--;
+                    result *= number;
+                } while (degree > 1);
+            }
+            else if(degree == 0)
+            {
+                result = 1;
+            }
+            else
+            {
+                result = -1;
+            }
 
             return result;
         }
@@ -309,4 +311,3 @@ namespace ReflectionPractic
         public void Save(T ID) { throw new NotImplementedException(); }
     }
 }
-
